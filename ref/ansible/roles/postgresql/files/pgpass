@@ -1,0 +1,1 @@
+{{ primary_ip }}:5432:*:{{ replication_user }}:{{ replication_password }}

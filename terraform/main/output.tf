@@ -1,3 +1,3 @@
-output "bastion_eip" {
-    value = module.networking.bastion_eip_id
+output "bastion_eip_address" {
+    value = module.networking.bastion_eip_address
 }

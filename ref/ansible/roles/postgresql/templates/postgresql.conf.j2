@@ -1,0 +1,7 @@
+# PostgreSQL Configuration
+listen_addresses = '*'
+wal_level = replica
+max_wal_senders = 5
+wal_keep_size = 64MB
+archive_mode = on
+archive_command = 'cp %p /var/lib/postgresql/{{ postgres_version }}/wal_archive/%f'

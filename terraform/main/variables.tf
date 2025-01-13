@@ -20,7 +20,7 @@ variable "private_subnets_block" {
 
 variable "bastion_ami" {
   description = "AMI for bastion instance creation"
-  default = "ami-0f2e255ec956ade7f"
+  default = "ami-0d26d6f57d53eff44"
 }
 
 variable "bastion_key_pair" {
@@ -35,7 +35,7 @@ variable "bastion_instance_type" {
 
 variable "postgresql_ami" {
   description = "AMI for postgresql instance creation"
-  default = "ami-0f2e255ec956ade7f"
+  default = "ami-0d26d6f57d53eff44"
 }
 
 

@@ -1,0 +1,35 @@
+---
+- name: Create replication user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    user: "{{ replication_user }}"
+    password: "{{ replication_password }}"
+    state: present
+    role_attr_flags: REPLICATION
+
+- name: Set password for postgres user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    user: postgres
+    password: "{{ postgresql_root_password }}"
+    state: present
+
+- name: Configure postgresql.conf
+  become: true
+  template:
+    src: "templates/postgresql.conf.j2"
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    owner: postgres
+    group: postgres
+  notify: restart postgresql
+
+- name: Configure pg_hba.conf
+  become: true
+  template:
+    src: "templates/pg_hba.conf.j2"
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    owner: postgres
+    group: postgres
+  notify: restart postgresql

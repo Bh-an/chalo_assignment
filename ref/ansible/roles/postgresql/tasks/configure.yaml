@@ -1,0 +1,30 @@
+- name: Configure PostgreSQL settings
+  template:
+    src: postgresql.conf.j2
+    dest: "{{ postgres_data_dir }}/postgresql.conf"
+    owner: postgres
+    group: postgres
+    mode: '0640'
+  notify: restart postgresql
+
+- name: Configure pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgres_data_dir }}/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: '0640'
+  notify: restart postgresql
+
+- name: Create primary PostgreSQL user
+  become_user: postgres
+  shell: |
+    psql -c "CREATE USER {{ postgres_primary_user }} WITH PASSWORD '{{ postgres_primary_password }}';"
+    psql -c "ALTER USER {{ postgres_primary_user }} WITH SUPERUSER;"
+  when: inventory_hostname == "primary"
+
+- name: Grant necessary privileges to primary PostgreSQL user
+  become_user: postgres
+  shell: |
+    psql -c "GRANT ALL PRIVILEGES ON DATABASE {{ postgres_primary_user }} TO {{ postgres_primary_user }};"
+  when: inventory_hostname == "primary"

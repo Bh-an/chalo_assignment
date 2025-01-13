@@ -13,3 +13,7 @@ output "private_subnet_ids" {
 output "bastion_eip_id" {
   value = aws_eip.bastion_eip.id
 }
+
+output "bastion_eip_address" {
+  value = aws_eip.bastion_eip.public_ip
+}
