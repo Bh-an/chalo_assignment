@@ -1,0 +1,4 @@
+---
+- name: restart postgresql
+  shell: "systemctl restart {{ postgresql_service_name }}"
+  become: true

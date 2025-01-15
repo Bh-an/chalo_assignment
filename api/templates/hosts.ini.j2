@@ -1,0 +1,17 @@
+[bastions]
+bastion ansible_host={{ bastion_eip_address }} ansible_user=ubuntu
+
+[primaries]
+primary ansible_host={{ primary_db_addr }} ansible_user=ubuntu ansible_ssh_private_key_file={{ db_key_path }}
+
+[replicas]
+{% for i in range(replica_db_addresses | length) %}
+replica{{ i+1 }} ansible_host={{ replica_db_addresses[i] }} ansible_user=ubuntu ansible_ssh_private_key_file={{ db_key_path }}
+{% endfor %}
+
+[postgresql:children]
+primaries
+replicas
+
+[all:vars]
+ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q -o StrictHostKeyChecking=no -i {{ bastion_key_path }} ubuntu@{{ bastion_eip_address }}"'

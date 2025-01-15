@@ -1,0 +1,8 @@
+---
+- name: Include vars from vars_2.yaml
+  include_vars:
+    file: vars/postgress_settings.yaml
+- include_tasks: install.yaml
+- include_tasks: configure.yaml
+- include_tasks: replication.yaml
+

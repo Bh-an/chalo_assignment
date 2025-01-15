@@ -1,0 +1,9 @@
+---
+# - import_playbook: install_postgresql.yaml
+# - import_playbook: configure_postgresql.yaml
+- hosts: postgresql
+  become: true
+  roles:
+    - ../roles/postgresql
+  vars_files:
+    - ../vault/vault.yaml

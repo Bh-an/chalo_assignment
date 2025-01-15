@@ -1,0 +1,144 @@
+---
+- name: Set path for state facts
+  set_fact:
+    state_facts_path: "/tmp/.ansible_state"
+
+- name: Ensure state directory exists
+  file:
+    path: "{{ state_facts_path }}"
+    state: directory
+    mode: 0700
+  
+- name: Check if replica user exists
+  stat:
+    path: "{{ state_facts_path }}/replication_user_exists"
+  register: replication_user_exists_file
+  when:
+    - "'primaries' in group_names"
+  
+- name: Set fact replication_user_exists if the state exists
+  set_fact:
+    replication_user_exists: "{{ replication_user_exists_file.stat.exists | bool }}"
+  when:
+    - "'primaries' in group_names"
+
+- name: Replication User on primary
+  block:
+    - name: Create user
+      become: true
+      become_user: postgres
+      shell: |
+        psql -c "CREATE ROLE {{ replication_user }} WITH REPLICATION LOGIN PASSWORD '{{ replication_password }}';"
+    - name: Create file to mark user creation
+      copy:
+        dest: "{{ state_facts_path }}/replication_user_exists"
+        content: "true"
+        mode: 0400
+  when:
+    - "'primaries' in group_names"
+    - not replication_user_exists | default(false)
+
+- name: Dump repl_user_exists after making user
+  ansible.builtin.debug:
+    var: replication_user_exists
+
+- name: Allow replication connections from all replicas on primary
+  template:
+    src: templates/pg_hba.conf.j2
+    dest: "{{ postgre_primary_directory }}/pg_hba.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: "0600"
+  when: "'primaries' in group_names"
+
+- name: restart postgresql
+  shell: "systemctl restart {{ postgresql_service_name }}"
+  become: true
+  when: "'primaries' in group_names"
+
+###################################################################################################################################
+- name: Check if is_replica state file exists
+  stat:
+    path: "{{ state_facts_path }}/is_replica"
+  register: is_replica_file
+  when:
+    - "'replicas' in group_names"
+
+- name: Set fact is_replica based on existence of state file
+  set_fact:
+    is_replica: "{{ is_replica_file.stat.exists | bool }}"
+  when:
+    - "'replicas' in group_names"  
+    
+
+- name: Dump pg_backup_var
+  ansible.builtin.debug:
+    var: is_replica
+
+- name: Stop postgresql on replica
+  shell: "systemctl stop {{ postgresql_service_name }}"
+  become: true
+  when:
+    - "'replicas' in group_names"
+    - not is_replica | default(false)
+
+- name: Remove existing data directory on replica
+  file:
+    path: "{{ postgres_data_dir }}"
+    state: absent
+  when:
+    - "'replicas' in group_names"
+    - not is_replica | default(false)
+
+- name: Turn server into replica
+  block:
+    - name: Run pg_basebackup command on replica
+      become: true
+      become_user: "{{ postgres_user }}"
+      command: >
+        pg_basebackup
+        -h {{ primary_ansible_host }}
+        -U {{ replication_user }}
+        -X stream
+        -C
+        -S {{ inventory_hostname }}_slot
+        -v
+        -R
+        -D {{ postgres_data_dir }}
+      throttle: 1
+      environment:
+        PGPASSWORD: "{{ replication_password }}"
+      retries: 3
+      delay: 50
+      register: pg_basebackup_result
+      failed_when: pg_basebackup_result.rc != 0
+    - name: create file to indicate replica set up
+      copy:
+        dest: "{{ state_facts_path }}/is_replica"
+        content: "true"
+        mode: 0400
+  when:
+    - "'replicas' in group_names"
+    - not is_replica | default(false)
+
+- name: dump is_replica
+  ansible.builtin.debug:
+    var: is_replica
+
+- name: Change ownership of the data directory on replica
+  file:
+    path: "{{ postgres_data_dir }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    recurse: yes
+  when:
+    - "'replicas' in group_names"
+    - not is_replica | default(false)
+
+- name: Start postgresql on replica
+  service:
+    name: "{{ postgresql_service_name }}"
+    state: started
+  when:
+    - "'replicas' in group_names"
+    - not is_replica | default(false)

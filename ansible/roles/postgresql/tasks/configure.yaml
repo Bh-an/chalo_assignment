@@ -1,0 +1,23 @@
+---
+- name: Create PostgreSQL data directory
+  file:
+    path: "{{ postgres_data_dir }}"
+    state: directory
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: "0700"
+
+- name: Copy postgresql.conf template
+  template:
+    src: templates/postgresql.conf.j2
+    dest: "{{ postgre_primary_directory }}/postgresql.conf"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: "0600"
+  when: "'primaries' in group_names"
+
+# - name: Ensure the postgresql service is enabled and started
+#   service:
+#     name: "{{ postgresql_service_name }}"
+#     state: started
+#     enabled: true

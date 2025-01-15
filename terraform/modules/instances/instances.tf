@@ -5,27 +5,27 @@ resource "aws_instance" "bastion" {
   key_name      = var.bastion_key_pair
   security_groups = [var.bastion_sg_id]
 
-  user_data = <<-EOF
-    #!/bin/bash
-    # Update the system
-    apt-get update -y
-    apt-get upgrade -y
+  # user_data = <<-EOF
+  #   #!/bin/bash
+  #   # Update the system
+  #   apt-get update -y
+  #   apt-get upgrade -y
 
-    # Install Ansible dependencies
-    apt-get install -y software-properties-common
+  #   # Install Ansible dependencies
+  #   apt-get install -y software-properties-common
 
-    # Add the Ansible PPA (Personal Package Archive)
-    add-apt-repository ppa:ansible/ansible -y
+  #   # Add the Ansible PPA (Personal Package Archive)
+  #   add-apt-repository ppa:ansible/ansible -y
 
-    # Update apt sources again after adding PPA
-    apt-get update -y
+  #   # Update apt sources again after adding PPA
+  #   apt-get update -y
 
-    # Install Ansible
-    apt-get install -y ansible
+  #   # Install Ansible
+  #   apt-get install -y ansible
 
-    # Verify Ansible installation
-    ansible --version
-  EOF
+  #   # Verify Ansible installation
+  #   ansible --version
+  # EOF
 
   tags = {
     Name = "bastion-host"
@@ -45,27 +45,27 @@ resource "aws_instance" "db_primary" {
   key_name      = var.db_key_pair
   security_groups = [var.db_sg_id]
 
-  user_data = <<-EOF
-    #!/bin/bash
-    # Update the system
-    apt-get update -y
-    apt-get upgrade -y
+  # user_data = <<-EOF
+  #   #!/bin/bash
+  #   # Update the system
+  #   apt-get update -y
+  #   apt-get upgrade -y
 
-    # Install Ansible dependencies
-    apt-get install -y software-properties-common
+  #   # Install Ansible dependencies
+  #   apt-get install -y software-properties-common
 
-    # Add the Ansible PPA (Personal Package Archive)
-    add-apt-repository ppa:ansible/ansible -y
+  #   # Add the Ansible PPA (Personal Package Archive)
+  #   add-apt-repository ppa:ansible/ansible -y
 
-    # Update apt sources again after adding PPA
-    apt-get update -y
+  #   # Update apt sources again after adding PPA
+  #   apt-get update -y
 
-    # Install Ansible
-    apt-get install -y ansible
+  #   # Install Ansible
+  #   apt-get install -y ansible
 
-    # Verify Ansible installation
-    ansible --version
-  EOF
+  #   # Verify Ansible installation
+  #   ansible --version
+  # EOF
 
   tags = {
     Name = "db-primary"
@@ -80,27 +80,27 @@ resource "aws_instance" "db_replica" {
   key_name      = var.db_key_pair
   security_groups = [var.db_sg_id]
 
-  user_data = <<-EOF
-    #!/bin/bash
-    # Update the system
-    apt-get update -y
-    apt-get upgrade -y
+  # user_data = <<-EOF
+  #   #!/bin/bash
+  #   # Update the system
+  #   apt-get update -y
+  #   apt-get upgrade -y
 
-    # Install Ansible dependencies
-    apt-get install -y software-properties-common
+  #   # Install Ansible dependencies
+  #   apt-get install -y software-properties-common
 
-    # Add the Ansible PPA (Personal Package Archive)
-    add-apt-repository ppa:ansible/ansible -y
+  #   # Add the Ansible PPA (Personal Package Archive)
+  #   add-apt-repository ppa:ansible/ansible -y
 
-    # Update apt sources again after adding PPA
-    apt-get update -y
+  #   # Update apt sources again after adding PPA
+  #   apt-get update -y
 
-    # Install Ansible
-    apt-get install -y ansible
+  #   # Install Ansible
+  #   apt-get install -y ansible
 
-    # Verify Ansible installation
-    ansible --version
-  EOF
+  #   # Verify Ansible installation
+  #   ansible --version
+  # EOF
 
   tags = {
     Name = "db-replica-${count.index + 1}"
