@@ -1,5 +1,0 @@
----
-- hosts: primaries
-  become: true
-- hosts: replicas
-  become: true

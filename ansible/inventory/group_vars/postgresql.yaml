@@ -1,4 +1,0 @@
-postgresql_version: 16
-postgresql_data_directory: /var/lib/postgresql/{{ postgresql_version }}/main
-postgresql_listen_address: '*'
-postgresql_max_connections: 100

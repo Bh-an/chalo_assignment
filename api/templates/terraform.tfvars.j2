@@ -1,0 +1,11 @@
+{% for key, value in config.items() %}
+{% if key == "private_subnets_block" %}
+{{ key }} = [
+{% for subnet in value %}
+"{{ subnet }}"{% if not loop.last %}, {% endif %}
+{% endfor %}
+]
+{% else %}
+{{ key }} = "{{ value }}"
+{% endif %}
+{% endfor %}

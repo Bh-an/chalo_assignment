@@ -1,0 +1,6 @@
+# PostgreSQL setting configuration
+postgress_settings:
+
+  max_connections: 50
+
+  max_wal_senders: 15

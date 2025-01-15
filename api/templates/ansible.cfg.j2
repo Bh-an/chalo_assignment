@@ -3,7 +3,7 @@ inventory = inventory/hosts.ini
 roles_path = roles
 remote_user = ubuntu
 ; ask_vault_pass = True
-private_key_file = ~/bastion_key.pem
+private_key_file = {{ bastion_key_path }}
 host_key_checking = False
 
 [privilege_escalation]
