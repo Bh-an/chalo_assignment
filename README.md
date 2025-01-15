@@ -9,7 +9,7 @@ An API platform for provisioning and setting up a replicated PostgreSQL ckuster 
 - A Linux based machine with a **Python 3.8+** environment to run the python app
 - **Terraform** installed and available in your system's `PATH`. [installation](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli).
 - **Ansible** installed and available in your system's `PATH`. [installation](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-for-development)
-- **AWS CLI** is required to be installed and configured for running terraform commands that use the aws provider. [instruction](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- **AWS CLI** is required to be installed and configured for running terraform commands that use the aws provider. [installation](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
 ### Setup
 
