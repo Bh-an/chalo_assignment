@@ -1,6 +1,6 @@
 # API platform for PostgreSQL setup
 
-An API platform for provisioning and setting up a replicated PostgreSQL ckuster on AWS elastic compute resources along with underlying infrastructure.
+An API platform for provisioning and setting up a replicated PostgreSQL primary-read-replica cluster on AWS resources along with underlying infrastructure.
 
 ---
 
