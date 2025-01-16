@@ -42,9 +42,9 @@ An API platform for provisioning and setting up a replicated PostgreSQL ckuster 
 4. **Creating and securing the Ansible Vault**
    > Note: It is important to configure the vault manually as it will contain our replication password
   
-   * Remove vault file it exists and make a new one
+   * Make a new directory and file for your vault
    * ```bash
-     rm -f ansible/vault/vault.yaml && touch rm -f ansible/vault/vault.yaml
+     mkdir ansible/vault && touch rm -f ansible/vault/vault.yaml
      ```
     * Add replication password to the file
      ```bash
