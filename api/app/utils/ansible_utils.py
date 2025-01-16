@@ -54,7 +54,7 @@ def configure_ansible(terraform_outputs, config_data):
 
       return {"message": "Ansible configuration completed successfully"}, None
     except Exception as e:
-         logger.error(f"Error configuring ansible {e}")
+         logger.exception(f"Error configuring ansible")
          return None, f"Error configuring ansible: {e}"
 
 def run_ansible_playbook(show_output=False, postgresql_version=None):
@@ -93,11 +93,15 @@ def run_ansible_playbook(show_output=False, postgresql_version=None):
                return_value["output"] = stdout.strip()
            return return_value, None
        else:
+           logger.error(f"Ansible playbook execution failed, details: {stderr.strip()}")
            return None, {"error": "Ansible playbook execution failed", "details": stderr.strip()}
 
     except FileNotFoundError:
         logger.error(f"Ansible executable or inventory not found")
         return None, {"error": "Ansible executable or inventory not found"}
+    except subprocess.TimeoutExpired as e:
+         logger.error(f"Ansible playbook timed out after {e.timeout} seconds")
+         return None, {"error": f"Ansible playbook timed out after {e.timeout} seconds", "details": str(e)}
     except Exception as e:
-         logger.error(f"Error while running ansible playbook {e}")
+         logger.exception(f"Error while running ansible playbook")
          return None, {"error": f"Error while running ansible playbook: {e}"}

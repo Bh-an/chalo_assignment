@@ -20,9 +20,8 @@ def generate_terraform_config():
             return jsonify({"error": error}), 400
         
         return jsonify(result), 200
-
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+        logger.exception(f"An unexpected error occurred")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
 def terraform_init():
@@ -37,7 +36,7 @@ def terraform_init():
             return jsonify(error), 400
         return jsonify(result), 200
     except Exception as e:
-         logger.error(f"An unexpected error occurred: {e}")
+         logger.exception(f"An unexpected error occurred")
          return jsonify({"error": "An unexpected error occurred"}), 500
 
 def terraform_plan():
@@ -52,7 +51,7 @@ def terraform_plan():
             return jsonify(error), 400
         return jsonify(result), 200
     except Exception as e:
-         logger.error(f"An unexpected error occurred: {e}")
+         logger.exception(f"An unexpected error occurred")
          return jsonify({"error": "An unexpected error occurred"}), 500
 
 def terraform_apply():
@@ -67,7 +66,7 @@ def terraform_apply():
              return jsonify(error), 400
         return jsonify(result), 200
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+        logger.exception(f"An unexpected error occurred")
         return jsonify({"error": "An unexpected error occurred"}), 500
 def terraform_destroy():
     """Handles terraform destroy command."""
@@ -81,7 +80,7 @@ def terraform_destroy():
             return jsonify(error), 400
         return jsonify(result), 200
     except Exception as e:
-         logger.error(f"An unexpected error occurred: {e}")
+         logger.exception(f"An unexpected error occurred")
          return jsonify({"error": "An unexpected error occurred"}), 500
 def terraform_output():
     """Handles terraform output command."""
@@ -95,5 +94,5 @@ def terraform_output():
             return jsonify(error), 400
       return jsonify(result), 200
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+        logger.exception(f"An unexpected error occurred")
         return jsonify({"error": "An unexpected error occurred"}), 500

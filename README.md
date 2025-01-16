@@ -42,7 +42,7 @@ An API platform for provisioning and setting up a replicated PostgreSQL ckuster 
 4. **Creating and securing the Ansible Vault**
    > Note: It is important to configure the vault manually as it will contain our replication password
   
-   * Remove any existing vault file and make a new one
+   * Remove vault file it exists and make a new one
    * ```bash
      rm -f ansible/vault/vault.yaml && touch rm -f ansible/vault/vault.yaml
      ```
@@ -86,12 +86,11 @@ python run.py
     *   **Example:**
         ```bash
         curl -X POST -H "Content-Type: application/json" -d '{
-            "bastion_key_pair": "path_to_your-bastion-key",
-            "db_key_pair": "path_to_your-db-key",
+            "bastion_key_pair": "<your_bastion_key_name>",
+            "db_key_pair": "<your_db_key_name>",
             "environment": "staging",
             "replica_count": "2",
-            "db_instance_type": "t2_medium"
-            ""
+            "db_instance_type": "t2.medium"
         }' http://localhost:5000/terraform/generate
         ```
 *   **`/terraform/init` (POST):**
@@ -154,6 +153,7 @@ python run.py
     *   **Description:** Configures Ansible files (`hosts.ini`, `ansible.cfg`, `postgress_settings.yaml`).
     *   **Request Body:** JSON object with required keys `bastion_key_path` and `db_key_path` and optional key-value pairs for `postgress_settings.yaml`
     > The optional variables support almost variables included in the [postgresql.conf](https://github.com/postgres/postgres/blob/master/src/backend/utils/misc/postgresql.conf.sample) file. be aware of impact changing certain values may cause
+    > key paths should contain extension if present
     *   **Response:**
         *   `200 OK`: On success, returns a success message.
         *   `400 Bad Request`: On failure, returns an error message detailing any issues.
@@ -184,3 +184,16 @@ python run.py
 *   The application logs to both console and log files (located at `logs/app.log`, `logs/terraform_utils.log`, and `logs/ansible_utils.log`).
 *   Logs include timestamps, log levels (DEBUG, INFO, ERROR, etc.), and messages.
 *  When output is set to true on terraform and ansible endpoints the output is logged to the `debug` log level.
+
+### Adding to the API
+
+* Changes to terraform:
+    * Changes to the /main/variables.tf file should be carried over to the terraform_utils.py file. All added variables should either be under REQUIRED_VARIABLES(no defaults) or OPTIONAL_VARIABLES(has defaults)
+    * Endpoint logic is defined in terraform_controller.py and additional definitions should exist there.
+    * Add route to api/routes.py
+* Changes to Ansible
+    * Changes to hosts.ini and ansible.cfg should be mirrored in the relevant jinja template in the templates directory
+    * Playbook and task specific changes dont need to be changed
+    * If adding playbooks, ansible_utils.py needs to be modified to make the command that is run more flexible
+    * Endpoint logic is defined in ansible_controller.py and additional definitions should exist there.
+    * Add route to api/routes.py

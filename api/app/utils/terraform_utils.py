@@ -9,13 +9,11 @@ config = Config()
 logger = setup_logger("terraform_utils", log_file='logs/terraform_utils.log')
 
 
-# Hardcoded required variables
 REQUIRED_VARIABLES = {
     "bastion_key_pair",
     "db_key_pair"
 }
 
-# Hardcoded optional variables with default values
 OPTIONAL_VARIABLES = {
     "region": "ap-south-1",
     "environment": "dev",
@@ -32,41 +30,38 @@ OPTIONAL_VARIABLES = {
 
 def generate_tfvars(user_config):
     """Generates a terraform.tfvars file from a template and user input."""
-    
-    # Filter out any invalid variables
-    valid_vars = set(OPTIONAL_VARIABLES.keys()).union(REQUIRED_VARIABLES)
-    invalid_vars = set(user_config.keys()).difference(valid_vars)
-    if invalid_vars:
-        logger.error(f"Invalid vars provided: {invalid_vars}")
-        return None, f"Invalid variables provided: {invalid_vars}"
-    
-    if not REQUIRED_VARIABLES.issubset(user_config.keys()):
-      missing_vars = REQUIRED_VARIABLES.difference(user_config.keys())
-      logger.error(f"Missing required vars: {missing_vars}")
-      return None, f"Missing required variables: {missing_vars}"
-    
-    template_env = Environment(loader=FileSystemLoader(config.TEMPLATE_DIR))
-    template = template_env.get_template('terraform.tfvars.j2') # Corrected line, changed template name
-
-    # Merge default values with user input, user input taking precedence
-    merged_config = {**OPTIONAL_VARIABLES, **user_config}
-
-      # Filter the config to only include user provided values
-    filtered_config = {key: value for key, value in merged_config.items() if key in user_config}
     try:
-        rendered_template = template.render(config=filtered_config)
+        valid_vars = set(OPTIONAL_VARIABLES.keys()).union(REQUIRED_VARIABLES)
+        invalid_vars = set(user_config.keys()).difference(valid_vars)
+        if invalid_vars:
+            logger.error(f"Invalid vars provided: {invalid_vars}")
+            return None, f"Invalid variables provided: {invalid_vars}"
+        
+        if not REQUIRED_VARIABLES.issubset(user_config.keys()):
+            missing_vars = REQUIRED_VARIABLES.difference(user_config.keys())
+            logger.error(f"Missing required vars: {missing_vars}")
+            return None, f"Missing required variables: {missing_vars}"
+        
+        template_env = Environment(loader=FileSystemLoader(config.TEMPLATE_DIR))
+        template = template_env.get_template('terraform.tfvars.j2')
 
+        merged_config = {**OPTIONAL_VARIABLES, **user_config}
+
+        filtered_config = {key: value for key, value in merged_config.items() if key in user_config}
+        rendered_template = template.render(config=filtered_config)
+        
         with open(config.TERRAFORM_VARS_FILE, 'w') as tfvars_file:
-            tfvars_file.write(rendered_template)
+              tfvars_file.write(rendered_template)
 
         return {
-            "message": "terraform.tfvars file generated successfully",
-             "used_variables": filtered_config,
-            "default_variables": {key: value for key, value in merged_config.items() if key not in user_config}
-        }, None
+              "message": "terraform.tfvars file generated successfully",
+               "used_variables": filtered_config,
+              "default_variables": {key: value for key, value in merged_config.items() if key not in user_config}
+          }, None
     except Exception as e:
-        logger.error(f"Error while generating terraform file {e}")
+        logger.exception(f"Error while generating terraform file")
         return None, f"Error while generating terraform file: {e}"
+
 
 def run_terraform_command(command, show_output=False):
     """Runs a terraform command and returns the output or an error message."""
@@ -81,7 +76,7 @@ def run_terraform_command(command, show_output=False):
         stdout, stderr = process.communicate()
         
         if show_output:
-            logger.debug(f"Terraform command '{command[1]}' output:\n{stdout}") # Log output
+            logger.debug(f"Terraform command '{command[1]}' output:\n{stdout}")
         
         if process.returncode == 0:
            return_value = {"message": f"Terraform command '{command[1]}' executed successfully"}
@@ -89,13 +84,17 @@ def run_terraform_command(command, show_output=False):
                return_value["output"] = stdout.strip()
            return return_value, None
         else:
+            logger.error(f"Terraform command '{command[1]}' failed, details: {stderr.strip()}")
             return None, {"error": f"Terraform command '{command[1]}' failed", "details": stderr.strip()}
 
     except FileNotFoundError:
         logger.error(f"Terraform binary not found: {config.TERRAFORM_BINARY}")
-        return None, {"error": f"Terraform binary not found"}
+        return None, {"error": f"Terraform binary not found: {config.TERRAFORM_BINARY}"}
+    except subprocess.TimeoutExpired as e:
+         logger.error(f"Terraform command '{command[1]}' timed out after {e.timeout} seconds")
+         return None, {"error": f"Terraform command '{command[1]}' timed out", "details": str(e)}
     except Exception as e:
-        logger.error(f"Error while running terraform command {e}")
+        logger.exception(f"Error while running terraform command")
         return None, {"error": f"Error while running terraform command: {e}"}
     
 
@@ -115,18 +114,18 @@ def get_terraform_outputs():
         try:
           outputs = json.loads(stdout)
           return outputs, None
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
           logger.error(f"Error decoding terraform outputs: {stdout}")
-          return None, f"Error decoding terraform output: {stdout}"
+          return None, f"Error decoding terraform output: {e}"
       else:
-          logger.error(f"Error getting terraform output {stderr}")
+          logger.error(f"Error getting terraform output, details: {stderr}")
           return None, f"Error getting terraform output: {stderr}"
           
     except FileNotFoundError:
          logger.error(f"Terraform binary not found: {config.TERRAFORM_BINARY}")
          return None, f"Terraform binary not found"
     except Exception as e:
-          logger.error(f"Error while getting terraform output {e}")
+          logger.exception(f"Error while getting terraform output")
           return None, f"Error while getting terraform output: {e}"
 
 def get_terraform_output(show_output=False):
@@ -148,11 +147,11 @@ def get_terraform_output(show_output=False):
           return return_value, None
 
       else:
-          logger.error(f"Error getting terraform output: {stderr}")
+          logger.error(f"Error getting terraform output, details: {stderr}")
           return None, {"error": f"Error getting terraform output: {stderr}"}
     except FileNotFoundError:
          logger.error(f"Terraform binary not found: {config.TERRAFORM_BINARY}")
          return None, f"Terraform binary not found"
     except Exception as e:
-          logger.error(f"Error while getting terraform output {e}")
+          logger.exception(f"Error while getting terraform output")
           return None, f"Error while getting terraform output: {e}"

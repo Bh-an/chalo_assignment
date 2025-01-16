@@ -25,7 +25,7 @@ def ansible_configure():
         return jsonify(result), 200
     
     except Exception as e:
-      logger.error(f"An unexpected error occurred: {e}")
+      logger.exception(f"An unexpected error occurred")
       return jsonify({"error": "An unexpected error occurred"}), 500
 
 def ansible_run():
@@ -41,5 +41,5 @@ def ansible_run():
             return jsonify(error), 400
         return jsonify(result), 200
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+        logger.exception(f"An unexpected error occurred")
         return jsonify({"error": "An unexpected error occurred"}), 500
